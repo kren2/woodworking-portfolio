@@ -3,88 +3,193 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Woodworking Portfolio – Kevin Ren</title>
+  <title>Woodworking Portfolio — Kevin Ren</title>
+  <meta name="description" content="A minimalist, text-only portfolio with infinite scroll." />
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Helvetica, Arial, sans-serif; color: #222; background: #fff; }
-    header { max-width: 960px; margin: 0 auto; padding: 56px 16px 24px; text-align: center; }
-    h1 { margin: 0 0 12px; font-weight: 600; font-size: clamp(22px, 4vw, 36px); letter-spacing: .3px; }
-    .intro { margin: 0 auto; max-width: 680px; opacity: .8; }
+    /* ---------- Base & Theme ---------- */
+    :root{
+      --bg:#0f1115; --panel:#151924; --muted:#9aa3b2; --text:#e6e9ef; --accent:#7aa2ff; --ring:rgba(122,162,255,.35);
+      --shadow: 0 20px 50px rgba(0,0,0,.35);
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#ffffff; --panel:#f6f7fb; --muted:#5b6577; --text:#1b2330; --accent:#2b5cff; --ring:rgba(43,92,255,.18); --shadow: 0 14px 36px rgba(20,32,60,.12); }
+    }
+    *{ box-sizing:border-box }
+    html{ scroll-behavior:smooth }
+    body{
+      margin:0; font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:radial-gradient(1200px 600px at 20% -10%, rgba(122,162,255,.12), transparent 60%),
+                 radial-gradient(1000px 500px at 120% 0%, rgba(20,220,190,.06), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+    }
+    a{ color:var(--accent); text-decoration:none }
+    a:focus-visible, button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px }
 
-    .gallery { max-width: 1100px; margin: 24px auto 80px; padding: 0 16px;
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    @media (max-width: 900px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 520px) { .gallery { grid-template-columns: 1fr; } }
+    /* ---------- Header / Nav ---------- */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: saturate(160%) blur(10px);
+      background: linear-gradient(to bottom, rgba(15,17,21,.7), rgba(15,17,21,.2));
+      border-bottom: 1px solid rgba(120,130,150,.12);
+    }
+    .nav-inner{
+      max-width: 1100px; margin:0 auto; padding: 14px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{ font-weight:700; letter-spacing:.3px }
+    .menu a{ padding:8px 12px; border-radius:8px }
+    .menu a:hover{ background:rgba(122,162,255,.12) }
 
-    .card { background: #fff; border-radius: 10px; overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(8px); opacity: 0;
-      transition: opacity .5s ease, transform .5s ease; }
-    .card.visible { opacity: 1; transform: translateY(0); }
+    /* ---------- Hero ---------- */
+    header.hero{
+      max-width: 1100px; margin: 48px auto 14px; padding: 0 18px;
+      display:grid; grid-template-columns: 1.2fr .8fr; gap:28px;
+    }
+    @media (max-width: 880px){ header.hero{ grid-template-columns: 1fr } }
+    .hero-card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)) , var(--panel);
+      border:1px solid rgba(120,130,150,.16); border-radius: var(--radius);
+      padding: 28px; box-shadow: var(--shadow);
+    }
+    h1{ margin:0 0 8px; font-size: clamp(26px, 5vw, 44px); line-height:1.2 }
+    .sub{ color:var(--muted); margin: 6px 0 10px }
+    .tagline{ color:var(--muted); margin:14px 0 0 }
 
-    .card img { width: 100%; height: auto; display: block; }
-    .cap { padding: 12px 14px; font-size: 14px; opacity: .8; }
+    /* ---------- Gallery (text-only cards) ---------- */
+    .container{ max-width:1100px; margin: 0 auto; padding: 0 18px 80px }
+    .grid{
+      margin-top: 22px;
+      display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:18px;
+    }
+    @media (max-width: 1000px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 560px){ .grid{ grid-template-columns: 1fr; } }
 
-    .sentinel { height: 1px; }
+    .card{
+      background: var(--panel); border:1px solid rgba(120,130,150,.16);
+      border-radius: var(--radius); padding:18px 18px 16px; box-shadow: var(--shadow);
+      transform: translateY(8px); opacity:0; transition: opacity .5s ease, transform .5s ease;
+    }
+    .card.visible{ opacity:1; transform: translateY(0) }
+    .title{ font-weight:600; margin: 2px 0 4px; letter-spacing:.2px }
+    .meta{ color:var(--muted); font-size:.9rem; margin-bottom:8px }
+    .desc{ margin:0; color: var(--text) }
+    .tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
+    .pill{ font-size:.78rem; padding:4px 10px; border-radius:999px; background: rgba(122,162,255,.12); color: var(--accent); border:1px solid var(--ring) }
+
+    /* ---------- Footer ---------- */
+    footer{
+      padding: 40px 18px 80px; text-align:center; color:var(--muted);
+    }
+    .sentinel{ height: 1px } /* for infinite scroll trigger */
+
+    /* ---------- Small niceties ---------- */
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.85em;
+      background: rgba(120,130,150,.15); padding:.12em .48em; border-radius:.5em; border:1px solid rgba(120,130,150,.24) }
+    .btn{
+      display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid rgba(120,130,150,.28);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+      color:var(--text)
+    }
+    .btn:hover{ border-color: var(--ring) }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Woodworking Portfolio</h1>
-    <p class="intro">A curated selection of my builds. Scroll to load more.</p>
+  <!-- Top navigation -->
+  <nav class="nav" aria-label="Primary">
+    <div class="nav-inner">
+      <div class="brand">Woodworking Portfolio</div>
+      <div class="menu">
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero" id="about">
+    <section class="hero-card">
+      <h1>Handcrafted projects, documented simply.</h1>
+      <p class="sub">Text-first gallery designed for speed and clarity. Infinite scroll loads more entries as you explore.</p>
+      <p class="tagline">Tip: Press <span class="kbd">/</span> to jump to search (coming later). For now, scroll to browse.</p>
+      <p style="margin-top:14px"><a class="btn" href="#work">See the work ↓</a></p>
+    </section>
+    <section class="hero-card" role="complementary">
+      <h2 style="margin:0 0 10px; font-size:20px">About</h2>
+      <p class="sub">This minimalist site is built with semantic HTML, modern CSS, and a tiny bit of vanilla JS (no frameworks). It supports dark/light mode, keyboard focus states, and efficient IntersectionObserver loading.</p>
+    </section>
   </header>
 
-  <main class="gallery" id="gallery"></main>
-  <div id="sentinel" class="sentinel"></div>
+  <!-- Work Grid -->
+  <main class="container" id="work" aria-live="polite">
+    <h2 style="margin: 24px 0 2px">Projects</h2>
+    <p class="sub">Text-only entries for now. Replace with your own content anytime.</p>
+
+    <section class="grid" id="grid" aria-label="Project list">
+      <!-- cards injected by JS -->
+    </section>
+    <div id="sentinel" class="sentinel" aria-hidden="true"></div>
+  </main>
+
+  <footer id="contact">
+    <p>Questions or collaboration? Email <a href="mailto:kevin@example.com">kevin@example.com</a>.</p>
+    <p style="margin-top:6px">© <span id="y"></span> Kevin Ren</p>
+  </footer>
 
   <script>
-    // TODO: replace these with your own image paths (e.g., "images/chair01.jpg")
-    const imageList = Array.from({ length: 60 }, (_, i) => ({
-      src: `https://picsum.photos/seed/wood${i}/800/600`,
-      cap: `Project #${i + 1}`
+    // ---- Content source (text-only). Replace with your real entries later.
+    const ALL_ENTRIES = Array.from({length: 120}, (_, i) => ({
+      title: `Project ${i+1}: Joinery Study`,
+      meta: `${2020 + (i % 6)} · Walnut · Hand tools`,
+      desc: `Notes and outcomes from a small bench build focusing on clean lines, durable joints, and repeatable processes. Iteration ${i+1}.`,
+      tags: ["Mortise & tenon", "Finishing", i % 2 ? "Design" : "Prototype"]
     }));
 
-    const gallery = document.getElementById('gallery');
-    const batchSize = 9; // how many to load each time
-    let index = 0;
+    const grid = document.getElementById('grid');
+    const sentinel = document.getElementById('sentinel');
+    const yearSpan = document.getElementById('y'); yearSpan.textContent = new Date().getFullYear();
 
-    // Reveal animation
+    // ---- Reveal animation on cards
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.2 });
+    }, { threshold: .2 });
 
-    function addCard({ src, cap }) {
-      const card = document.createElement('article');
-      card.className = 'card';
-      const img = document.createElement('img');
-      img.loading = 'lazy';
-      img.src = src;
-      img.alt = cap || 'Woodworking project';
-      const caption = document.createElement('div');
-      caption.className = 'cap';
-      caption.textContent = cap || '';
-      card.appendChild(img);
-      card.appendChild(caption);
-      gallery.appendChild(card);
-      revealObserver.observe(card);
+    // ---- Render helpers
+    function cardHTML(item){
+      const el = document.createElement('article');
+      el.className = 'card';
+      el.innerHTML = `
+        <div class="title">${escapeHTML(item.title)}</div>
+        <div class="meta">${escapeHTML(item.meta)}</div>
+        <p class="desc">${escapeHTML(item.desc)}</p>
+        <div class="tags">${item.tags.map(t=>`<span class="pill">${escapeHTML(t)}</span>`).join('')}</div>
+      `;
+      return el;
+    }
+    function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // ---- Infinite scroll
+    let cursor = 0;
+    const BATCH = 9;
+
+    function loadMore(){
+      if (cursor >= ALL_ENTRIES.length) { io.disconnect(); return; }
+      const slice = ALL_ENTRIES.slice(cursor, cursor + BATCH);
+      slice.forEach(item => {
+        const el = cardHTML(item);
+        grid.appendChild(el);
+        revealObserver.observe(el);
+      });
+      cursor += slice.length;
     }
 
-    function loadMore() {
-      const next = imageList.slice(index, index + batchSize);
-      next.forEach(addCard);
-      index += next.length;
-      if (index >= imageList.length) {
-        // Stop observing when we’ve loaded everything
-        io.unobserve(sentinel);
-      }
-    }
-
-    // Infinite scroll sentinel
-    const sentinel = document.getElementById('sentinel');
     const io = new IntersectionObserver((entries) => {
       if (entries.some(e => e.isIntersecting)) loadMore();
     }, { rootMargin: '600px 0px' });
 
-    // Kick off
+    // initial paint
     loadMore();
     io.observe(sentinel);
   </script>
